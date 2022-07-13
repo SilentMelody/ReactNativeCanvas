@@ -8,109 +8,55 @@
  * @format
  */
 
-import React, {type PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import React, {useRef} from 'react';
+import {SafeAreaView, Button, StyleSheet} from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-const Section: React.FC<
-  PropsWithChildren<{
-    title: string;
-  }>
-> = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+import Canvas from './src/canvas/canvas';
+// import Canvas2 from './src/canvas/canvas2';
+// import Canvas3 from './src/canvas/canvas3';
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  const myCanvasRef: any = useRef({});
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  // this is error
+  const drawCanvas = () => {
+    const ctx: any = myCanvasRef.current.getContext();
+    if (ctx !== undefined) {
+      ctx.fillStyle = '#ff0';
+      ctx.fillRect(0, 0, 100, 200);
+      ctx.strokeStyle = '#0000ff';
+      ctx.strokeRect(20, 20, 50, 100);
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = 'black';
+      ctx.fillStyle = 'red';
+      ctx.fillRect(90, 20, 50, 100);
+      ctx.shadowBlur = 0;
+    }
+  };
+
+  // this is error
+  const clearCanvas = () => {
+    const ctx: any = myCanvasRef.current.getContext();
+    ctx.clearRect(0, 0, myCanvasRef.current.width, myCanvasRef.current.height);
+    myCanvasRef.current.paint();
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+    <SafeAreaView>
+      <Canvas style={styles.canvas} ref={myCanvasRef} width={300} height={300} />
+      <Button onPress={() => drawCanvas()} title="Click" />
+      <Button onPress={() => clearCanvas()} title="Clear" />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  canvas: {
+    height: 200,
+    width: 400,
+    borderColor: 'black',
+    borderWidth: 2,
+    borderStyle: 'solid',
   },
 });
 
