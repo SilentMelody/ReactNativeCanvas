@@ -1,15 +1,23 @@
-import {Skia} from '@shopify/react-native-skia';
+import {Skia, SkPath} from '@shopify/react-native-skia';
 
 import {allAreFinite, radiansToDegrees, almostEqual} from './util';
 // CanvasPath methods, which all take an Path object as the first param
 
-export function arc(skpath, x, y, radius, startAngle, endAngle, ccw) {
+export function arc(
+  skpath: SkPath,
+  x: number,
+  y: number,
+  radius: number,
+  startAngle: number,
+  endAngle: number,
+  ccw: number,
+) {
   // As per  https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-arc
   // arc is essentially a simpler version of ellipse.
   ellipse(skpath, x, y, radius, radius, 0, startAngle, endAngle, ccw);
 }
 
-export function arcTo(skpath, x1, y1, x2, y2, radius) {
+export function arcTo(skpath: SkPath, x1: number, y1: number, x2: number, y2: number, radius: number) {
   if (!allAreFinite([x1, y1, x2, y2, radius])) {
     return;
   }
@@ -22,7 +30,7 @@ export function arcTo(skpath, x1, y1, x2, y2, radius) {
   skpath.arcToTangent(x1, y1, x2, y2, radius);
 }
 
-export function bezierCurveTo(skpath, cp1x, cp1y, cp2x, cp2y, x, y) {
+export function bezierCurveTo(skpath: SkPath, cp1x: any, cp1y: any, cp2x: any, cp2y: any, x: any, y: any) {
   if (!allAreFinite([cp1x, cp1y, cp2x, cp2y, x, y])) {
     return;
   }
@@ -32,18 +40,26 @@ export function bezierCurveTo(skpath, cp1x, cp1y, cp2x, cp2y, x, y) {
   skpath.cubicTo(cp1x, cp1y, cp2x, cp2y, x, y);
 }
 
-export function closePath(skpath) {
+export function closePath(skpath: SkPath) {
   if (skpath.isEmpty()) {
     return;
   }
   // Check to see if we are not just a single point
-  var bounds = skpath.getBounds();
+  var bounds: any = skpath.getBounds();
   if (bounds[3] - bounds[1] || bounds[2] - bounds[0]) {
     skpath.close();
   }
 }
 
-export function _ellipseHelper(skpath, x, y, radiusX, radiusY, startAngle, endAngle) {
+export function _ellipseHelper(
+  skpath: SkPath,
+  x: any,
+  y: any,
+  radiusX: number,
+  radiusY: number,
+  startAngle: number,
+  endAngle: number,
+) {
   var sweepDegrees = radiansToDegrees(endAngle - startAngle);
   var startDegrees = radiansToDegrees(startAngle);
 
@@ -66,7 +82,18 @@ export function _ellipseHelper(skpath, x, y, radiusX, radiusY, startAngle, endAn
   skpath.arcToOval(_oval, startDegrees, sweepDegrees, false);
 }
 
-export function ellipse(skpath, x, y, radiusX, radiusY, rotation, startAngle, endAngle, ccw) {
+export function ellipse(
+  this: any,
+  skpath: SkPath,
+  x: any,
+  y: any,
+  radiusX: any,
+  radiusY: any,
+  rotation: any,
+  startAngle: any,
+  endAngle: any,
+  ccw: number,
+) {
   if (!allAreFinite([x, y, radiusX, radiusY, rotation, startAngle, endAngle])) {
     return;
   }
@@ -108,14 +135,18 @@ export function ellipse(skpath, x, y, radiusX, radiusY, rotation, startAngle, en
     return;
   }
 
-  var rotated = Skia.Matrix().rotate(rotation, x, y);
-  var rotatedInvert = Skia.Matrix().rotate(-rotation, x, y);
+  // var rotated = Skia.Matrix().rotate(rotation, x, y);
+  // var rotatedInvert = Skia.Matrix().rotate(-rotation, x, y);
+
+  var rotated = this._canvas.rotate(rotation, x, y);
+  var rotatedInvert = this._canvas.rotate(-rotation, x, y);
+
   skpath.transform(rotatedInvert);
   _ellipseHelper(skpath, x, y, radiusX, radiusY, startAngle, endAngle);
   skpath.transform(rotated);
 }
 
-export function lineTo(skpath, x, y) {
+export function lineTo(skpath: SkPath, x: any, y: any) {
   if (!allAreFinite([x, y])) {
     return;
   }
@@ -126,14 +157,14 @@ export function lineTo(skpath, x, y) {
   skpath.lineTo(x, y);
 }
 
-export function moveTo(skpath, x, y) {
+export function moveTo(skpath: SkPath, x: any, y: any) {
   if (!allAreFinite([x, y])) {
     return;
   }
   skpath.moveTo(x, y);
 }
 
-export function quadraticCurveTo(skpath, cpx, cpy, x, y) {
+export function quadraticCurveTo(skpath: SkPath, cpx: any, cpy: any, x: any, y: any) {
   console.log(4);
   if (!allAreFinite([cpx, cpy, x, y])) {
     return;
@@ -144,8 +175,8 @@ export function quadraticCurveTo(skpath, cpx, cpy, x, y) {
   skpath.quadTo(cpx, cpy, x, y);
 }
 
-export function rect(skpath, x, y, width, height) {
-  var _rect = Skia.XYWHRect(x, y, width, height);
+export function rect(skpath: SkPath, x: number, y: number, width: number, height: number) {
+  var _rect: any = Skia.XYWHRect(x, y, width, height);
   if (!allAreFinite(_rect)) {
     return;
   }
@@ -153,9 +184,8 @@ export function rect(skpath, x, y, width, height) {
   skpath.addRect(_rect);
 }
 
-export function Path2D(path) {
+export function Path2D(this: any, path: any) {
   this._path = null;
-  console.log(999, path);
   if (typeof path === 'string') {
     this._path = Skia.Path.Make();
   } else if (path && path._getPath) {
@@ -168,7 +198,7 @@ export function Path2D(path) {
     return this._path;
   };
 
-  this.addPath = function (path2d, transform) {
+  this.addPath = function (path2d: any, transform: any) {
     if (!transform) {
       transform = {
         a: 1,
@@ -189,15 +219,15 @@ export function Path2D(path) {
     ]);
   };
 
-  this.arc = function (x, y, radius, startAngle, endAngle, ccw) {
+  this.arc = function (x: number, y: number, radius: number, startAngle: number, endAngle: number, ccw: number) {
     arc(this._path, x, y, radius, startAngle, endAngle, ccw);
   };
 
-  this.arcTo = function (x1, y1, x2, y2, radius) {
+  this.arcTo = function (x1: number, y1: number, x2: number, y2: number, radius: number) {
     arcTo(this._path, x1, y1, x2, y2, radius);
   };
 
-  this.bezierCurveTo = function (cp1x, cp1y, cp2x, cp2y, x, y) {
+  this.bezierCurveTo = function (cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number) {
     bezierCurveTo(this._path, cp1x, cp1y, cp2x, cp2y, x, y);
   };
 
@@ -205,24 +235,33 @@ export function Path2D(path) {
     closePath(this._path);
   };
 
-  this.ellipse = function (x, y, radiusX, radiusY, rotation, startAngle, endAngle, ccw) {
+  this.ellipse = function (
+    x: number,
+    y: number,
+    radiusX: number,
+    radiusY: number,
+    rotation: number,
+    startAngle: number,
+    endAngle: number,
+    ccw: number,
+  ) {
     ellipse(this._path, x, y, radiusX, radiusY, rotation, startAngle, endAngle, ccw);
   };
 
-  this.lineTo = function (x, y) {
+  this.lineTo = function (x: number, y: number) {
     lineTo(this._path, x, y);
   };
 
-  this.moveTo = function (x, y) {
+  this.moveTo = function (x: number, y: number) {
     console.log(5);
     moveTo(this._path, x, y);
   };
 
-  this.quadraticCurveTo = function (cpx, cpy, x, y) {
+  this.quadraticCurveTo = function (cpx: number, cpy: number, x: number, y: number) {
     quadraticCurveTo(this._path, cpx, cpy, x, y);
   };
 
-  this.rect = function (x, y, width, height) {
+  this.rect = function (x: number, y: number, width: number, height: number) {
     rect(this._path, x, y, width, height);
   };
 }

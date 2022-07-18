@@ -66,6 +66,15 @@ export function CanvasRenderingContext2D(skcanvas) {
   this.fillStyle = '';
   this.strokeStyle = '';
   this.font = '';
+  this.shadowColor = '';
+  this.shadowBlur = 0;
+  this.globalAlpha = 1;
+  this.strokeWidth = 1;
+  this.currentTransform = [];
+  this.globalCompositeOperation = this._globalCompositeOperation;
+  this.lineDashOffset = 0;
+  this.shadowOffsetX = 0;
+  this.shadowOffsetY = 0;
 
   // This always accepts DOMMatrix/SVGMatrix or any other
   // object that has properties a,b,c,d,e,f defined.
@@ -883,6 +892,25 @@ export function CanvasRenderingContext2D(skcanvas) {
   };
 
   this.restore = function () {
+    var newState = this._canvasStateStack.pop();
+    if (!newState) {
+      return;
+    }
+    this._paint = newState.paint;
+
+    this._lineDashList = newState.ldl;
+    this._strokeWidth = newState.sw;
+    this._strokeStyle = newState.ss;
+    this._fillStyle = newState.fs;
+    this._shadowOffsetX = newState.sox;
+    this._shadowOffsetY = newState.soy;
+    this._shadowBlur = newState.sb;
+    this._shadowColor = newState.shc;
+    this._globalAlpha = newState.ga;
+    this._globalCompositeOperation = newState.gco;
+    this._lineDashOffset = newState.ldo;
+    this._fontString = newState.fontstr;
+
     this._canvas.restore();
   };
 
@@ -894,6 +922,38 @@ export function CanvasRenderingContext2D(skcanvas) {
   };
 
   this.save = function () {
+    if (this._fillStyle._copy) {
+      var fs = this._fillStyle._copy();
+      this._toCleanUp.push(fs);
+    } else {
+      var fs = this._fillStyle;
+    }
+
+    if (this._strokeStyle._copy) {
+      var ss = this._strokeStyle._copy();
+      this._toCleanUp.push(ss);
+    } else {
+      var ss = this._strokeStyle;
+    }
+
+    this._canvasStateStack.push({
+      ctm: this._currentTransform.slice(),
+      ldl: this._lineDashList.slice(),
+      sw: this._strokeWidth,
+      ss: ss,
+      fs: fs,
+      sox: this._shadowOffsetX,
+      soy: this._shadowOffsetY,
+      sb: this._shadowBlur,
+      shc: this._shadowColor,
+      ga: this._globalAlpha,
+      ldo: this._lineDashOffset,
+      gco: this._globalCompositeOperation,
+      paint: this._paint.copy(),
+      fontstr: this._fontString,
+      //TODO: textAlign, textBaseline
+    });
+    // Saves the clip
     this._canvas.save();
   };
 
